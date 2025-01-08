@@ -21,10 +21,10 @@ Conda:
 
 Next, **install the required packages** with:
 
-        pip install -r requirements.txt
+    pip install -r requirements.txt
 
 Finally, **launch the app** by running:
 
-        python3 app.py
+    python3 app.py
 
 which should launch a Gradio demo, follow the url given to the web app.
