@@ -12,13 +12,23 @@ from openai import OpenAI
 import shutil
 import os
 from selenium.webdriver.common.by import By
+from pydantic import BaseModel
 
-# Obtain the version of ChromeDriver compatible with the browser being used
-options = Options()
-options.add_argument("--headless")
-driver=webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+# classe for openai structured outputs
+class QuizSchema(BaseModel):
+    question: str
+    choice1: str
+    choice2: str
+    choice3: str
+    choice4: str
+    correct_choice: int
 
 def scrapeURL(link):
+    # Obtain the version of ChromeDriver compatible with the browser being used
+    options = Options()
+    options.add_argument("--headless")
+    driver=webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+
     # use selenium to scrape the url provided
     wait = WebDriverWait(driver, 10)
     driver.get(link)

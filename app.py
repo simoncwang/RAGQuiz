@@ -3,6 +3,7 @@ import gradio as gr
 from QuizSystem import QuizSystem
 import os
 import re
+import numpy as np
 
 class QuizApp:
     def __init__(self):
@@ -59,52 +60,109 @@ class QuizApp:
             output += f"- {file}\n"
         
         return output
+    
+    # checking if answer is correct
+    def check_answer(self,choices,correct_choice):
+        # getting users choice (just the first choice)
+        your_choice = choices[0]
 
-# Create an instance of the app
-quiz_app = QuizApp()
+        # if no answer was chosen
+        if your_choice:
+            if your_choice == correct_choice:
+                return gr.Markdown("Congrats! You answered correctly!")
+            else:
+                return gr.Markdown(f"Sorry, the correct answer was actually **{correct_choice}**, you chose **{your_choice}**!")
+        else:
+            return gr.Markdown("You haven't selected an answer yet, please try again.")
 
-# Creating Gradio demo
-with gr.Blocks() as demo:
-    gr.Markdown(
-        """
-        **Please enter your OpenAI API Key here. Must be completed before using the app!**
-        """
-    )
-    api_key = gr.Textbox(label="OpenAI API Key", placeholder="Your API key here")
-    api_key_btn = gr.Button("Submit")
-
-    with gr.Row():
-        with gr.Column():
-            gr.Markdown(
-            """
-            # Instructions
-            Upload any documents or URLs below to be used as your personal quiz library!
-            """)
-            url = gr.Textbox(label="url", placeholder="Enter a URL here")
-            url_btn = gr.Button("Submit URL")
-
-            upload_btn = gr.UploadButton("Click to upload files!", file_count="multiple")
-
-            file_list = gr.Textbox(label="My Files", placeholder="No files uploaded yet")
-        with gr.Column():
-            gr.Markdown(
-            """
-            # Your Custom Quiz
-            Below is a question designed to test your knowledge on a random file from your uploads!
-            """)
-            question = gr.Markdown(
-            """
-            *Your Question*
-            """
-            )
-            generate_btn = gr.Button("Generate Question")
-            
-
-    # Button behaviors
-    api_key_btn.click(quiz_app.initSystem, inputs=[api_key])
-    upload_btn.upload(quiz_app.add_files, inputs=[upload_btn], outputs=file_list)
-    url_btn.click(quiz_app.add_url, inputs=[url], outputs=file_list)
-    generate_btn.click(quiz_app.generate_question, outputs=question)
 
 if __name__ == "__main__":
+    # Create an instance of the app
+    quiz_app = QuizApp()
+
+    # Creating Gradio demo
+    with gr.Blocks(title="RAG Quiz") as demo:
+
+        gr.Markdown(
+            """
+            # RAG Quiz
+            Custom quizzes generated from any document or URL of your choosing, with the power of retrieal augmented generation!
+
+            Check out the code and documentation on my [GitHub](https://github.com/simoncwang/RAGQuiz)!
+            """
+        )
+
+        with gr.Row():
+            with gr.Column():
+                gr.Markdown(
+                """
+                # Instructions
+                **First submit your OpenAI API Key.** Then, upload any documents or URLs below to be used as your personal quiz library!
+                """)
+
+                api_key = gr.Textbox(label="OpenAI API Key", placeholder="Your API key here")
+                api_key_btn = gr.Button("Submit")
+
+
+                url = gr.Textbox(label="url", placeholder="Enter a URL here")
+                url_btn = gr.Button("Submit URL")
+
+                upload_btn = gr.UploadButton("Click to upload files!", file_count="multiple")
+
+                file_list = gr.Textbox(label="My Files", placeholder="No files uploaded yet")
+            with gr.Column():
+                # correct choice state is set by generate button
+                correct_choice = gr.State(0)
+                
+                gr.Markdown(
+                    """
+                    # Your Custom Quiz
+                    Below is a question designed to test your knowledge on a random file from your uploads!
+                    """
+                )
+
+                generate_btn = gr.Button("Click to generate a question!")
+
+                gr.Markdown(
+                    """
+                    ## Your question
+                    """
+                )
+
+                questionDisplay = gr.Markdown(
+                """
+                *question will be generated here*
+                """
+                )
+
+                gr.Markdown(
+                    """
+                    ## Your choices, only **one** is correct!
+                    """
+                )
+
+                choiceDisplay = gr.Markdown(
+                    """
+                    *choices will be generated here*
+                    """
+                )
+
+                choices = gr.CheckboxGroup(label="your choices", choices=[1, 2, 3, 4])
+
+                submit_btn = gr.Button("Click to submit your answer choice!") 
+
+                choice_check = gr.Markdown("")
+
+        # Button behaviors
+        api_key_btn.click(quiz_app.initSystem, inputs=[api_key])
+        upload_btn.upload(quiz_app.add_files, inputs=[upload_btn], outputs=file_list)
+        url_btn.click(quiz_app.add_url, inputs=[url], outputs=file_list)
+        generate_btn.click(quiz_app.generate_question, outputs=[questionDisplay,choiceDisplay,correct_choice,choice_check])
+        submit_btn.click(fn=quiz_app.check_answer, inputs=[choices,correct_choice], outputs=[choice_check])
+
+        # dispaly behaviors
+        questionDisplay.change(show_progress="minimal")
+        choiceDisplay.change(show_progress="minimal")
+
+    # launching the demo
     demo.launch(server_name='0.0.0.0')
