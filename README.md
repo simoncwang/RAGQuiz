@@ -36,3 +36,9 @@ Below is a screenshot example of the UI, once running it will contain some instr
 ![Screenshot 2025-01-09 at 12 31 43 AM](https://github.com/user-attachments/assets/272b0d1f-e6f9-45d4-98f3-1981b1da25da)
 
 NOTE: You can submit multiple files to be stored in the system, and the generate quiz function will randomly select a file from your list to create a question! Files can be uploaded directly from your computer, OR through URL (content is scraped using Selenium).
+
+### Launching a public demo
+
+By default, the app.py script launches a demo running on a local server. If you would like to create a share-able public link, on the last line of app.py add the "share=True" argument to the Gradio demo launch. This will create a link that lasts for 72 hours as long as you leave the script running, and can be shared with others.
+
+    demo.launch(server_name='0.0.0.0', share=True)
