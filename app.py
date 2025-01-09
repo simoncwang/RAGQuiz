@@ -165,4 +165,4 @@ if __name__ == "__main__":
         choiceDisplay.change(show_progress="minimal")
 
     # launching the demo
-    demo.launch(server_name='0.0.0.0',share=True)
+    demo.launch(server_name='0.0.0.0')
