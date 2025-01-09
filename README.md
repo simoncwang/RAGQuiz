@@ -1,4 +1,7 @@
 # RAGQuiz
+
+[**🌐 Blog Post**](https://simoncwang.github.io/projects/personalrag.html)
+
 A personalized quiz system using retrieval augmented generation.
 
 ## Instructions
